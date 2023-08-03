@@ -1,0 +1,29 @@
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "io.franzbecker:gradle-lombok:4.0.0"
+        classpath "io.qameta.allure:allure-gradle:2.8.1"
+    }
+}
+
+subprojects {
+
+    apply plugin: "java"
+    apply plugin: "io.franzbecker.gradle-lombok"
+    apply plugin: "io.qameta.allure"
+
+    repositories {
+        //proxies the dependencies that are in the maven, and downloads everything faster
+        jcenter()
+//    mavenCentral()
+//    mavenLocal() downloads everything from the local repository
+    }
+}
+
+wrapper {
+    gradleVersion = "6.8"
+}

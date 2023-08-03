@@ -1,0 +1,104 @@
+repositories {
+    mavenCentral()
+}
+ext {
+    junitJupiterVersion = '5.9.0'
+    assertJVersion = '3.20.2'
+    selenideVersion = '6.10.1'
+    allureVersion = '2.14.0'
+    webDrivermanagerVersion = '5.0.3'
+    lombokVersion = '1.18.24'
+    slf4jVersion = '2.0.3'
+    logbackVersion = '1.2.9'
+    jsoupVersion = '1.15.3'
+}
+
+//compile -> implementation
+//testCompile -> testImplementation
+dependencies {
+    //implementation - visible everywhere
+    //testImplementation - only visible in the class
+    //UI
+    implementation("com.codeborne:selenide:$selenideVersion")
+    implementation group: 'io.qameta.allure', name: 'allure-junit5', version: allureVersion
+    implementation group: 'io.qameta.allure', name: 'allure-selenide', version: allureVersion
+    implementation group: 'io.qameta.allure', name: 'allure-rest-assured', version: allureVersion
+    implementation group: 'io.github.bonigarcia', name: 'webdrivermanager', version: webDrivermanagerVersion
+    //ALL
+    implementation("org.junit.jupiter:junit-jupiter-api:$junitJupiterVersion")
+    implementation("org.junit.jupiter:junit-jupiter-engine:$junitJupiterVersion")
+    implementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: junitJupiterVersion
+    implementation group: 'org.assertj', name: 'assertj-core', version: assertJVersion
+    implementation("org.projectlombok:lombok:$lombokVersion")
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: slf4jVersion
+    implementation group: 'org.slf4j', name: 'slf4j-simple', version: slf4jVersion
+
+    implementation group: 'org.slf4j', name: 'slf4j-log4j12', version: slf4jVersion
+
+    implementation group: 'ch.qos.logback', name: 'logback-classic', version: logbackVersion
+    implementation group: 'ch.qos.logback', name: 'logback-core', version: logbackVersion
+    implementation group: 'org.jsoup', name: 'jsoup', version: jsoupVersion
+}
+
+allure {
+    version = "$allureVersion"
+    autoconfigure = true
+    aspectjweaver = true
+    aspectjVersion = '1.8.10'
+    configuration = 'implementation' //to be seen @Step on allure
+
+    resultsDir = file("${rootDir}/tests/build/allure-results")
+    reportDir = file("${rootDir}/tests/build/reports/allure-report")
+
+    useJUnit5 {
+        version = "$allureVersion"
+    }
+}
+
+import io.qameta.allure.gradle.task.AllureReport
+
+task allureAggregatedReport(type: AllureReport) {
+    allure.resultsDir
+}
+
+//Run tests with junit5
+//Change test runner in settings idea on gradle and it will work
+test {
+    useJUnitPlatform()
+    dependsOn cleanTest
+    testLogging {
+        failFast = false
+        events 'PASSED', 'FAILED', 'SKIPPED'
+        exceptionFormat 'full'
+        test.testLogging.showStandardStreams = true
+        //Alternative log
+        afterSuite { desc, result ->
+            if (!desc.parent) {
+                println "\nTest result: ${result.resultType}"
+                println "Test summary: ${result.testCount} tests, " +
+                        "${result.successfulTestCount} succeeded, " +
+                        "${result.failedTestCount} failed, " +
+                        "${result.skippedTestCount} skipped"
+            }
+        }
+    }
+}.finalizedBy allureAggregatedReport
+
+//task openAllureReport() {
+//    dependsOn 'allureServe'
+//}
+//test.finalizedBy(openAllureReport)
+//
+//task generateAllureReport() {
+//    dependsOn 'allureReport'
+//}
+//test.finalizedBy(generateAllureReport)
+
+//clean.doFirst {
+//    delete "${rootDir}/ui-tests/allure-results"
+//    delete "${rootDir}/ui-tests/allure-report"
+//    delete "${rootDir}/ui-tests/target"
+//    delete "${rootDir}/ui-tests/build"
+//    delete "${rootDir}/ui-tests/out"
+//
+//}
