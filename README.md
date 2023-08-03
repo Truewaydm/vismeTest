@@ -40,7 +40,7 @@ gradle: [Version: LATEST]
 
 ## Instructions
 
-```git clone repository```
+```git clone git@github.com:Truewaydm/vismeTest.git```
 
 ## How to run tests:
 
